@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Explaining the Meaning of Martial Art</title>
+
+  <!-- Texturina = opening English title · Redaction 20 = poem texts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Texturina:opsz,wght@12..72,400;12..72,600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://fonts.cdnfonts.com/css/redaction" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- Con trỏ dấu chân mèo (to x3) -->
+  <img id="cat-paw-cursor" class="cat-paw-cursor" src="A1 Interactive Assets/0.OPENING/Cat Print.png" alt="" aria-hidden="true" />
+
+  <svg width="0" height="0" class="svg-filter-def" aria-hidden="true">
+    <defs>
+      <!-- Opening: loang mực khi hover chữ -->
+      <filter id="ink-spread">
+        <feTurbulence type="fractalNoise" baseFrequency="0.025" numOctaves="3" result="noise" />
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="14" xChannelSelector="R" yChannelSelector="G" />
+      </filter>
+      <!-- Poem 4: mặt hồ gợn sóng -->
+      <filter id="water" x="-5%" y="-5%" width="110%" height="110%" color-interpolation-filters="sRGB">
+        <feTurbulence id="waterTurb" type="fractalNoise" baseFrequency="0.006 0.02" numOctaves="2" seed="7" result="noise" />
+        <feDisplacementMap id="waterDisp" in="SourceGraphic" in2="noise" scale="0" xChannelSelector="R" yChannelSelector="G" />
+      </filter>
+    </defs>
+  </svg>
+
+  <div id="viewport-wrapper">
+    <div id="canvas-root">
+
+      <!-- =========================================
+           LỚP NỀN: texture → mist (40%) → mọi thứ khác
+      ========================================= -->
+      <img class="layer bg-texture" src="A1 Interactive Assets/0.OPENING/0. Texture.png" alt="" />
+      <!-- bản texture thứ 2 nối tiếp, mép trên mờ dần để không thấy đường nối -->
+      <img class="layer bg-texture bg-texture-2" src="A1 Interactive Assets/0.OPENING/0. Texture.png" alt="" />
+
+      <img class="layer mist mist-1 mist-drift-1" src="A1 Interactive Assets/0.OPENING/Mist 1.png" alt="" />
+      <!-- mist của frame 2 (toạ độ = frame 2 + 15717) -->
+      <img class="layer mist" src="A1 Interactive Assets/0.OPENING/Mist 1.png" style="left:0; top:16617px; width:1440px; height:3165px" alt="" />
+      <img class="layer mist" src="A1 Interactive Assets/0.OPENING/Mist 2.png" style="left:0; top:20717px; width:1440px; height:1881px" alt="" />
+      <img class="layer mist" src="A1 Interactive Assets/0.OPENING/Mist 3.png" style="left:0; top:23717px; width:1440px; height:2721px" alt="" />
+
+      <!-- opening -->
+      <div class="layer opening-sky"></div>
+
+      <div id="paw-stamps-layer" class="layer paw-stamps-layer"></div>
+
+      <!-- Chữ thư pháp: tự "viết" ra từ trái sang phải khi tải trang -->
+      <img id="calligraphy-btn" class="layer interactive calligraphy-trigger" src="A1 Interactive Assets/0.OPENING/Calligraphy.png" alt="Calligraphy Title" />
+
+      <!-- Dấu mèo (to x3) + vùng click -->
+      <img id="cat-seal-img" class="layer cat-seal-btn" src="A1 Interactive Assets/0.OPENING/Cat Print.png" alt="Cat Seal" />
+      <div id="cat-seal-btn" class="layer interactive cat-seal-hitbox" title="Click to toggle cat paw cursor"></div>
+
+      <div class="layer opening-en-text title-meaning">Explaining the meaning</div>
+      <div class="layer opening-en-text title-of">of</div>
+      <div class="layer opening-en-text title-martial">Martial Art</div>
+
+      <!-- poem1 -->
+      <img id="incense-smoke" class="layer smoke-layer" src="A1 Interactive Assets/1.FIRST POEM/2. smoke.png" alt="Smoke" />
+
+      <img id="tiger-top" class="layer interactive tiger-layer tiger-top" src="A1 Interactive Assets/1.FIRST POEM/3a. Tiger top.png" alt="Tiger top" />
+      <img id="tiger-mid" class="layer interactive tiger-layer tiger-mid" src="A1 Interactive Assets/1.FIRST POEM/3b. Tiger middle.png" alt="Tiger middle" />
+      <img id="tiger-bot" class="layer interactive tiger-layer tiger-bot" src="A1 Interactive Assets/1.FIRST POEM/3c. Tiger bottom.png" alt="Tiger bottom" />
+
+      <div class="layer cat-sleep-wrap">
+        <img class="layer cat-sleep-body" src="A1 Interactive Assets/1.FIRST POEM/1. meo nam tren co.png" alt="Sleeping Cat" />
+        <img id="cat-eyes-closed" class="layer cat-eyes eyes-closed" src="A1 Interactive Assets/1.FIRST POEM/1b. mat meo nham.png" alt="Eyes Closed" />
+        <img id="cat-eyes-open" class="layer cat-eyes eyes-open" src="A1 Interactive Assets/1.FIRST POEM/1b. mat meo mo.png" alt="Eyes Open" />
+        <div id="cat-face-hitbox" class="interactive cat-face-hitbox" title="Hover over the cat's face"></div>
+      </div>
+
+      <div id="incense-bowl-hitbox" class="layer interactive incense-bowl-hitbox" title="Hover or click the incense bowl"></div>
+
+      <div class="poem-verse poem1-line-1" data-anim="dodge">Into a soul absolutely free
+From thoughts and emotion,</div>
+      <div class="poem-verse poem1-line-2" data-anim="dodge">Even the tiger finds no room
+To insert its fierce claws.</div>
+
+      <!-- transition-1-2 -->
+      <img class="layer trans-bg" src="A1 Interactive Assets/1A.TRANSITION 1-2/0. bg.png" alt="" />
+      <img class="layer mountain-reveal mountain-top" data-delay="0" src="A1 Interactive Assets/1A.TRANSITION 1-2/1a. mountain top.png" alt="Mountain Top" />
+      <img class="layer mountain-reveal mountain-bottom" data-delay="350" src="A1 Interactive Assets/1A.TRANSITION 1-2/1b. mountain bottom.png" alt="Mountain Bottom" />
+
+      <!-- poem2 -->
+      <img class="layer pine-grass" src="A1 Interactive Assets/2.SECOND POEM/0. cat on grass.png" alt="Cat on grass" />
+
+      <img class="layer pine-bottom" src="A1 Interactive Assets/2.SECOND POEM/2c. pine bottom.png" alt="Pine bottom" />
+      <img class="layer pine-middle" src="A1 Interactive Assets/2.SECOND POEM/2b. pine middle.png" alt="Pine middle" />
+      <img class="layer pine-top" src="A1 Interactive Assets/2.SECOND POEM/2a. pine top.png" alt="Pine top" />
+
+      <div id="pine-scene-hitbox" class="layer interactive pine-scene-hitbox"></div>
+
+      <img class="layer wind-layer wind-under-anim wind-under" src="A1 Interactive Assets/2.SECOND POEM/1a. wind underneath.png" alt="Wind underneath" />
+      <img class="layer wind-layer wind-top-anim wind-top" src="A1 Interactive Assets/2.SECOND POEM/1b. wind middle top.png" alt="Wind top" />
+
+      <div class="poem-verse poem2-line-1" data-anim="wave">One and the same breeze passes
+Over the pines on the mountain</div>
+
+      <img id="valley-bg-layer" class="layer valley-ink-reveal valley-bg" src="A1 Interactive Assets/2.SECOND POEM/6. bg valley.png" alt="Valley bg" />
+      <img id="valley-main-layer" class="layer valley-ink-reveal valley-main" src="A1 Interactive Assets/2.SECOND POEM/3. valley.png" alt="Valley" />
+
+      <div id="valley-hitbox" class="layer interactive valley-hitbox"></div>
+
+      <img id="valley-wind-layer" class="layer valley-wind-reveal valley-wind" src="A1 Interactive Assets/2.SECOND POEM/4. wind in valley.png" alt="Wind in valley" />
+
+      <img id="flute-cat-btn" class="layer interactive flute-cat-trigger" src="A1 Interactive Assets/2.SECOND POEM/5. cat playing flute.png" alt="Cat playing flute" />
+
+      <div id="poem2-line-2" class="poem-verse poem2-wind-reveal poem2-line-2" data-anim="wave">And the oak trees in the valley;
+And why do they give different notes?</div>
+
+      <!-- poem3 -->
+      <!-- STANZA 1 -->
+      <img class="layer monk-bg-red" src="A1 Interactive Assets/3.THIRD POEM/4a. bg red.png" alt="Background red" />
+      <img id="monk-cloud-layer" class="layer monk-cloud-flow monk-cloud" src="A1 Interactive Assets/3.THIRD POEM/0. cloud.png" alt="Cloud" />
+      <img class="layer monk-rock" src="A1 Interactive Assets/3.THIRD POEM/1. rock.png" alt="Rock" />
+
+      <img id="monk-halo" class="layer monk-halo-layer monk-halo" src="A1 Interactive Assets/3.THIRD POEM/4. monks halo.png" alt="Monk halo" />
+      <img id="monk-figure" class="layer monk-reveal-target monk-figure" src="A1 Interactive Assets/3.THIRD POEM/2. monk.png" alt="Monk" />
+      <img id="cat-on-monk-img" class="layer monk-reveal-target cat-on-monk" src="A1 Interactive Assets/3.THIRD POEM/3. cat on monk.png" alt="Cat on monk" />
+
+      <div id="monk-cat-reveal-hitbox" class="layer interactive monk-cat-reveal-hitbox"></div>
+      <div id="monk-head-hitbox" class="layer interactive monk-head-hitbox"></div>
+
+      <div class="poem-verse poem3-line-1" data-anim="fade">No thinking, no reflecting,
+Perfect emptiness;</div>
+
+      <!-- STANZA 2 -->
+      <img class="layer water-flow rock-trans-end" src="A1 Interactive Assets/3.THIRD POEM/rock transition.png" alt="Rock transition" />
+
+      <div id="monk-and-cat-wrap" class="layer monk-and-cat-wrap">
+        <img class="layer monk-and-cat" src="A1 Interactive Assets/3.THIRD POEM/6. monk and cat.png" alt="Monk and cat" />
+        <img class="layer end-cat-tail" src="A1 Interactive Assets/3.THIRD POEM/7. cats tail 1.png" alt="Cat tail" />
+        <img class="layer end-cat-tail end-cat-tail-2" src="A1 Interactive Assets/3.THIRD POEM/7a. cats tail 2.png" alt="Cat tail alternate" />
+      </div>
+
+      <img class="layer end-clouds" src="A1 Interactive Assets/3.THIRD POEM/5. cloudss.png" alt="Clouds" />
+
+      <div class="poem-verse poem3-line-2" data-anim="fade">Yet therein something moves,
+Following its own course.</div>
+
+      <!-- =========================================
+           NỐI THÁC NƯỚC (cuối frame 1) → DÒNG SUỐI (poem 4)
+           chỉnh left/top/width/height ở .water-bridge trong CSS nếu lệch
+      ========================================= -->
+      <div class="layer water-bridge" aria-hidden="true">
+        <div class="wb-tint"></div>
+        <div class="wb-fall"><div class="wb-streaks s1"></div><div class="wb-streaks s2"></div></div>
+      </div>
+
+      <!-- =========================================
+           FRAME 2 — POEM 4 → POEM 6
+           (toạ độ bên trong giữ nguyên như file frame 2)
+      ========================================= -->
+      <div class="frame2" id="frame2">
+
+        <!-- ================= POEM 4 ================= -->
+        <section class="p4" id="p4" style="left:-10px; top:5px; width:1460px; height:2536px">
+          <div class="p4-water" id="p4Water">
+            <div class="p4-layer p4-bottom">
+              <img class="fill" src="A1 Interactive Assets/FOURTH POEM/1a. moon in water.png" alt="" />
+              <p class="poem light" data-anim="float" style="left:132px; top:1283px; width:488px">The moon in the stream.</p>
+            </div>
+
+            <div class="p4-layer p4-top" id="p4Top">
+              <img class="fill" src="A1 Interactive Assets/FOURTH POEM/1b. cat in water.png" alt="" />
+              <p class="poem light center" data-anim="float" style="left:486px; top:1244px; width:488px">The eyes see it,<br />But no hands can take hold of it</p>
+            </div>
+
+            <canvas class="p4-ripples" id="p4Ripples"></canvas>
+          </div>
+
+          <div class="hit" id="p4Hit" style="left:0; top:700px; width:1460px; height:1836px"></div>
+        </section>
+
+        <!-- ================= POEM 5 ================= -->
+        <p class="poem center" id="p5Text" data-anim="drift" style="left:313px; top:3100px; width:814px">Clouds and mists,<br />They are midair transformations;</p>
+
+        <!-- nền nằm DƯỚI mây để không che mép dưới mây -->
+        <img class="abs" src="A1 Interactive Assets/FIFTH POEM/2. bg.png" style="left:4px; top:4269px; width:1460px; height:2897px" alt="" />
+
+        <!-- bottom + almost bottom → tản sang PHẢI · almost top + top → tản sang TRÁI -->
+        <img class="abs p5-cloud" src="A1 Interactive Assets/FIFTH POEM/1a. cloud bottom.png"       data-dx="700"  data-dy="-200" style="left:5.19px; top:2074.28px; width:1468.16px; height:1898.41px" alt="" />
+        <img class="abs p5-cloud" src="A1 Interactive Assets/FIFTH POEM/1b. cloud almost bottom.png" data-dx="900"  data-dy="-80"  style="left:-86px;  top:2060px;     width:955.80px;  height:1243.35px" alt="" />
+        <img class="abs p5-cloud" src="A1 Interactive Assets/FIFTH POEM/1c. cloud almost top.png"    data-dx="-900" data-dy="-60"  style="left:369px;  top:2762.66px;  width:1134px;    height:1026.68px" alt="" />
+        <img class="abs p5-cloud" src="A1 Interactive Assets/FIFTH POEM/1d. cloud top.png"           data-dx="-700" data-dy="200"  style="left:5.13px; top:3411.56px;  width:1458px;    height:1250.44px" alt="" />
+
+        <div class="p5-moonwrap" id="p5MoonWrap" style="left:0; top:4680px; width:1440px; height:2501px">
+          <img class="abs p5-moonbg" id="p5MoonBg" src="A1 Interactive Assets/FIFTH POEM/3a. moon bg.png" style="left:0; top:0; width:1440px; height:2501px" alt="" />
+          <img class="abs p5-moon"   id="p5Moon"   src="A1 Interactive Assets/FIFTH POEM/3b. moon.png"    style="left:0; top:398px; width:1440px; height:1670px" alt="" />
+        </div>
+
+        <img class="abs p5-sun" id="p5Sun" src="A1 Interactive Assets/FIFTH POEM/4. sun.png" style="left:0; top:4913px; width:1440px; height:1670px" alt="sun" />
+
+        <p class="poem center" data-anim="drift" style="left:313px; top:4859px; width:814px">Above them enternally shine the sun and the moon.</p>
+
+        <!-- ================= POEM 6 ================= -->
+        <img class="abs" src="A1 Interactive Assets/SIXTH POEM/0. bg.png" style="left:-10px; top:6678px; width:1460px; height:3224px" alt="" />
+
+        <!-- vị trí gốc của kiếm (vô hình) — dùng để biết khi nào scroll ngược lên -->
+        <div class="sword-home" id="swordHome" style="left:124px; top:6854px; width:1192px; height:1534px"></div>
+
+        <!-- Kiếm + lửa đi chung một nhóm để kéo thả -->
+        <div class="sword-group" id="swordGroup" style="left:0; top:6854px; width:1440px; height:1870px">
+          <div class="p6-sword" id="p6Sword" style="left:124px; top:0; width:1192px; height:1534px">
+            <img class="fill" src="A1 Interactive Assets/SIXTH POEM/3. sword.png" alt="sword" />
+            <div class="hit sword-hit" id="swordHit"></div>
+          </div>
+          <img class="abs p6-flames" id="p6Flames" src="A1 Interactive Assets/SIXTH POEM/4. swords fire.png" style="left:0; top:50px; width:1440px; height:1820px" alt="" />
+        </div>
+
+        <img class="abs" src="A1 Interactive Assets/SIXTH POEM/5. green bg.png" style="left:0;      top:8880px; width:1440px; height:3192px" alt="" />
+        <img class="abs" src="A1 Interactive Assets/SIXTH POEM/2. cloud.png"    style="left:-150px; top:9580px; width:1739px; height:1842px" alt="" />
+
+        <img class="abs p6-lotus" id="p6Lotus" src="A1 Interactive Assets/SIXTH POEM/7. om mani padme hum.png" style="left:0; top:9842px; width:1440px; height:1525px" alt="" />
+        <img class="abs p6-cat"   id="p6Cat"   src="A1 Interactive Assets/SIXTH POEM/6. cat sleep peace.png"   style="left:0; top:9842px; width:1440px; height:1525px" alt="cat" />
+        <div class="hit" id="catHit" style="left:300px; top:10330px; width:700px; height:520px"></div>
+
+        <div class="p6-endcloud" id="endCloud" style="left:539px; top:11731px; width:361px; height:643px">
+          <img class="fill" src="A1 Interactive Assets/SIXTH POEM/2. cloud.png" alt="" />
+        </div>
+
+        <p class="poem" data-anim="lift" style="left:124px; top:6877px; width:814px">Victory is for the one,<br />Even before the combat,</p>
+        <p class="poem center" data-anim="lift" style="left:312px; top:9434px; width:814px">Who has no thought of himself<br />Abiding in the no-mind-ness of Great Origin.</p>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

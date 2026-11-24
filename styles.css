@@ -1,0 +1,1067 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  background-color: #EBE9E5;
+  overflow-x: hidden;
+}
+
+body {
+  font-family: 'Redaction 20', 'Redaction', Georgia, serif;
+}
+
+/* =========================================
+   KHUNG 1440px — JS scale theo bề ngang màn hình
+========================================= */
+#viewport-wrapper {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+#canvas-root {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1440px;
+  height: 28197px;            /* frame 1 (15717) + frame 2 (12480) */
+  background: #EBE9E5;
+  overflow: hidden;
+  transform-origin: 0 0;
+}
+
+.svg-filter-def { position: absolute; width: 0; height: 0; }
+
+.layer {
+  position: absolute;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.interactive { pointer-events: auto; }
+
+/* Bấm phím D để xem các vùng hover */
+body.debug .hit,
+body.debug [class*="hitbox"] {
+  outline: 4px dashed red;
+  background: rgba(255, 0, 0, .08);
+}
+
+/* =========================================
+   CON TRỎ DẤU CHÂN MÈO (x3)
+========================================= */
+body.paw-cursor-mode,
+body.paw-cursor-mode * {
+  cursor: none !important;
+}
+
+.cat-paw-cursor {
+  position: fixed;
+  width: 340px;
+  height: 340px;
+  left: -400px;
+  top: -400px;
+  transform: translate(-50%, -50%) scale(1);
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0;
+  transition: opacity 0.15s ease, transform 0.08s ease;
+}
+.cat-paw-cursor.is-visible { opacity: 1; }
+.cat-paw-cursor.is-stamped { transform: translate(-50%, -50%) scale(0.9); }
+
+.paw-stamps-layer {
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  z-index: 40;
+}
+
+.stamped-paw {
+  position: absolute;
+  width: 340px;
+  height: 340px;
+  transform: translate(-50%, -50%) rotate(var(--rot, 0deg));
+  opacity: 0.82;
+  pointer-events: none;
+  animation: stampPop 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes stampPop {
+  0%   { opacity: 0.3; }
+  100% { opacity: 0.82; }
+}
+
+/* =========================================
+   NỀN: texture (z1) → mist 40% (z2) → còn lại
+========================================= */
+.bg-texture {
+  width: 1440px;
+  height: 15481px;
+  left: 0;
+  top: 0;
+  z-index: 1;
+}
+
+/* bản thứ 2 nối tiếp, chồng lên bản 1 một đoạn và mờ dần ở mép trên → không có vạch nối */
+.bg-texture-2 {
+  top: 14800px;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 680px);
+          mask-image: linear-gradient(to bottom, transparent 0, #000 680px);
+}
+
+.mist {
+  z-index: 2;
+  opacity: 0.4;
+  object-fit: contain;
+}
+
+.mist-1 {
+  width: 1460px;
+  height: 2721px;
+  left: -10px;
+  top: -14px;
+}
+
+.mist-drift-1 { animation: mistDrift 18s ease-in-out infinite alternate; }
+@keyframes mistDrift {
+  0%   { transform: translateX(-18px); }
+  100% { transform: translateX(18px); }
+}
+
+/* =========================================
+   0. OPENING
+========================================= */
+.opening-sky {
+  width: 1682px;
+  height: 2575px;
+  left: -104px;
+  top: -35px;
+  background: linear-gradient(
+    180deg,
+    #41679C 0%,
+    rgba(139.51, 158.79, 184.28, 0.52) 30%,
+    rgba(215, 210, 200, 0.21) 76%
+  );
+  z-index: 3;
+}
+
+/* ---- Thư pháp: "viết" từ trái sang phải, dòng trên rồi dòng dưới ---- */
+.calligraphy-trigger {
+  width: 1000px;
+  height: 785px;
+  left: 220px;
+  top: 163px;
+  z-index: 15;
+  cursor: pointer;
+  transition: filter 1.1s cubic-bezier(0.22, 1, 0.36, 1), transform 1.1s ease;
+
+  /* 2 lớp mask: lớp 1 = dòng trên (武道), lớp 2 = dòng dưới (釋義) */
+  -webkit-mask-image:
+    linear-gradient(90deg, #000 0 45%, transparent 55% 100%),
+    linear-gradient(90deg, #000 0 45%, transparent 55% 100%);
+          mask-image:
+    linear-gradient(90deg, #000 0 45%, transparent 55% 100%),
+    linear-gradient(90deg, #000 0 45%, transparent 55% 100%);
+  -webkit-mask-size: 220% 47%, 220% 55%;
+          mask-size: 220% 47%, 220% 55%;
+  -webkit-mask-repeat: no-repeat;
+          mask-repeat: no-repeat;
+  -webkit-mask-position: 100% 0%, 100% 100%;
+          mask-position: 100% 0%, 100% 100%;
+}
+
+.calligraphy-trigger.writing {
+  animation: brushWrite 4.2s forwards;
+}
+
+/* có khoảng nghỉ giữa các chữ như đang nhấc bút */
+@keyframes brushWrite {
+  0%   { -webkit-mask-position: 100% 0%, 100% 100%; mask-position: 100% 0%, 100% 100%; animation-timing-function: ease-in-out; }
+  22%  { -webkit-mask-position: 50% 0%,  100% 100%; mask-position: 50% 0%,  100% 100%; }
+  28%  { -webkit-mask-position: 50% 0%,  100% 100%; mask-position: 50% 0%,  100% 100%; animation-timing-function: ease-in-out; }
+  48%  { -webkit-mask-position: 0% 0%,   100% 100%; mask-position: 0% 0%,   100% 100%; }
+  54%  { -webkit-mask-position: 0% 0%,   100% 100%; mask-position: 0% 0%,   100% 100%; animation-timing-function: ease-in-out; }
+  74%  { -webkit-mask-position: 0% 0%,   50% 100%;  mask-position: 0% 0%,   50% 100%; }
+  80%  { -webkit-mask-position: 0% 0%,   50% 100%;  mask-position: 0% 0%,   50% 100%; animation-timing-function: ease-in-out; }
+  100% { -webkit-mask-position: 0% 0%,   0% 100%;   mask-position: 0% 0%,   0% 100%; }
+}
+
+/* viết xong thì bỏ mask */
+.calligraphy-trigger.written {
+  -webkit-mask-image: none;
+          mask-image: none;
+  animation: none;
+}
+
+/* hover giữ nguyên như cũ */
+.calligraphy-trigger:hover,
+.calligraphy-trigger.ink-bloomed {
+  filter: url(#ink-spread) drop-shadow(0 0 12px rgba(168, 28, 28, 0.45));
+  transform: scale(1.015);
+}
+
+.opening-en-text {
+  opacity: 0;
+  filter: blur(8px);
+  transform: translateY(10px);
+  transition: opacity 1.1s ease, filter 1.1s ease, transform 1.1s ease;
+  z-index: 16;
+  font-family: 'Texturina', serif;
+  font-weight: 600;
+  word-wrap: break-word;
+}
+.opening-en-text.revealed {
+  opacity: 1;
+  filter: blur(0);
+  transform: translateY(0);
+}
+
+.title-meaning {
+  width: 342px;
+  height: 196px;
+  left: 244px;
+  top: 163px;
+  color: #1D1B19;
+  font-size: 60px;
+}
+.title-of {
+  width: 603px;
+  height: 112px;
+  left: 436px;
+  top: 464px;
+  text-align: center;
+  color: #01070C;
+  font-size: 72px;
+}
+.title-martial {
+  width: 342px;
+  height: 84px;
+  left: 854px;
+  top: 819px;
+  text-align: right;
+  color: #26334C;
+  font-size: 60px;
+}
+
+/* ---- Dấu mèo: to x3 (255 → 765), giữ nguyên tâm cũ, không biến dạng ---- */
+.cat-seal-btn {
+  width: 688.5px;
+  height: 668.25px;
+  left: 27.25px;
+  top: 580.625px;
+  z-index: 20;
+}
+
+/* vùng click chỉ quanh con dấu (ảnh PNG có nhiều viền trong suốt) */
+.cat-seal-hitbox {
+  width: 300px;
+  height: 300px;
+  left: 221.5px;
+  top: 764.75px;
+  z-index: 21;
+  cursor: pointer;
+}
+
+/* =========================================
+   1. FIRST POEM
+========================================= */
+.cat-sleep-wrap {
+  width: 1440px;
+  height: 997px;
+  left: 0.03px;
+  top: 2050.56px;
+  z-index: 12;
+}
+.cat-sleep-body {
+  width: 1440px;
+  height: 997px;
+  left: 0;
+  top: 0;
+}
+.cat-face-hitbox {
+  position: absolute;
+  width: 345px;
+  height: 240px;
+  left: 58.97px;
+  top: 250px;
+  z-index: 25;
+  cursor: pointer;
+}
+.cat-eyes {
+  width: 345px;
+  height: 208px;
+  left: 58.97px;
+  top: 269.44px;
+  transition: opacity 0.18s ease;
+}
+.eyes-closed { opacity: 1; }
+.eyes-open   { opacity: 0; }
+
+.incense-bowl-hitbox {
+  width: 180px;
+  height: 160px;
+  left: 575px;
+  top: 2790px;
+  z-index: 26;
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+.smoke-layer {
+  width: 1585.34px;
+  height: 1704.18px;
+  left: -79px;
+  top: 1013.16px;
+  transform: rotate(-5deg);
+  transform-origin: top left;
+  z-index: 8;
+  opacity: 0;
+  filter: blur(8px);
+  clip-path: circle(0% at 45% 98%);
+  transition: clip-path 0.4s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease, filter 0.35s ease;
+}
+.smoke-layer.smoke-active {
+  opacity: 1;
+  filter: blur(0);
+  clip-path: circle(160% at 45% 98%);
+}
+
+.tiger-layer {
+  z-index: 14;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.tiger-top { width: 348px; height: 299px; left: 934.03px; top: 1126.56px; }
+.tiger-mid { width: 328px; height: 694px; left: 561.03px; top: 1667.57px; }
+.tiger-bot { width: 400px; height: 544px; left: 1040.03px; top: 2242.56px; }
+
+.smoke-layer.smoke-active ~ .tiger-layer.is-hovered { opacity: 1; }
+
+.poem1-line-1 {
+  width: 586px;
+  left: 122px;
+  top: 1341px;
+  color: #0A111A;
+}
+.poem1-line-2 {
+  width: 631px;
+  left: 687px;
+  top: 1788px;
+  text-align: right;
+  color: #0A111A;
+}
+
+/* =========================================
+   1A. TRANSITION 1-2
+========================================= */
+.trans-bg {
+  width: 1460.16px;
+  height: 2028px;
+  left: -10px;
+  top: 2853px;
+  z-index: 6;
+}
+.mountain-top {
+  width: 1460px;
+  height: 2220px;
+  left: -10px;
+  top: 2929px;
+  z-index: 7;
+}
+.mountain-bottom {
+  width: 1440px;
+  height: 2000px;
+  left: -7px;
+  top: 3039px;
+  z-index: 8;
+}
+.mountain-reveal {
+  opacity: 0;
+  transform: translateY(70px);
+  transition: opacity 1.2s cubic-bezier(0.22, 1, 0.36, 1), transform 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.mountain-reveal.in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* =========================================
+   CHỮ THƠ — Redaction 20 Regular 36px
+========================================= */
+.poem-verse {
+  position: absolute;
+  font-family: 'Redaction 20', 'Redaction', Georgia, serif;
+  font-size: 36px;
+  font-weight: 400;
+  line-height: 54px;
+  word-wrap: break-word;
+  white-space: pre-line;
+  z-index: 22;
+}
+
+/* =========================================
+   2. SECOND POEM
+========================================= */
+.pine-grass {
+  width: 1440px;
+  height: 2000px;
+  left: 0px;
+  top: 4977px;
+  z-index: 9;
+}
+.pine-bottom {
+  width: 1200px;
+  height: 1667px;
+  left: 240px;
+  top: 5101px;
+  z-index: 10;
+  opacity: 0;
+  transform: translateY(-90px);
+  transition: opacity 0.9s ease, transform 1.1s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.pine-middle {
+  width: 1250px;
+  height: 1736px;
+  left: 0px;
+  top: 4975px;
+  z-index: 11;
+  opacity: 0;
+  transform: translateY(-90px);
+  transition: opacity 0.9s ease 0.15s, transform 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.15s;
+}
+.pine-top {
+  width: 1300px;
+  height: 1806px;
+  left: 140px;
+  top: 4858px;
+  z-index: 12;
+  opacity: 0;
+  transform: translateY(-90px);
+  transition: opacity 0.9s ease 0.3s, transform 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.3s;
+}
+.pine-settled .pine-bottom,
+.pine-settled .pine-middle,
+.pine-settled .pine-top {
+  opacity: 1;
+  transform: translateY(0px);
+}
+
+.pine-scene-hitbox {
+  width: 1440px;
+  height: 1484px;
+  left: 0px;
+  top: 4858px;
+  z-index: 16;
+}
+
+.wind-under {
+  width: 1200px;
+  height: 1113px;
+  left: 333px;
+  top: 5933px;
+  z-index: 13;
+}
+.wind-top {
+  width: 1000px;
+  height: 1366px;
+  left: -75px;
+  top: 5105px;
+  z-index: 14;
+}
+.wind-layer {
+  opacity: 0;
+  transition: opacity 0.55s ease, transform 1.2s ease-in-out;
+}
+.wind-active .wind-top-anim {
+  opacity: 1;
+  animation: breezeDriftTop 3.6s ease-in-out infinite alternate;
+}
+.wind-active .wind-under-anim {
+  opacity: 1;
+  animation: breezeDriftUnder 3.6s ease-in-out infinite alternate;
+}
+@keyframes breezeDriftTop {
+  0%   { transform: translate(0px, 0px); }
+  100% { transform: translate(18px, -6px); }
+}
+@keyframes breezeDriftUnder {
+  0%   { transform: translate(0px, 0px); }
+  100% { transform: translate(-18px, 6px); }
+}
+
+.poem2-line-1 {
+  width: 531px;
+  left: 366px;
+  top: 5033px;
+  color: #090C08;
+  z-index: 22;
+}
+
+.valley-bg {
+  width: 1440px;
+  height: 1943px;
+  left: 0px;
+  top: 7007px;
+  z-index: 9;
+}
+.valley-main {
+  width: 1460px;
+  height: 2028px;
+  left: -10px;
+  top: 7062px;
+  z-index: 11;
+}
+.valley-ink-reveal {
+  opacity: 0;
+  filter: url(#ink-spread) blur(14px);
+  clip-path: circle(0% at 15% 92%);
+  transition: clip-path 1.5s cubic-bezier(0.22, 1, 0.36, 1), filter 1.4s ease, opacity 0.6s ease;
+}
+.valley-ink-reveal.valley-bloomed {
+  opacity: 1;
+  filter: blur(0px);
+  clip-path: circle(165% at 15% 92%);
+}
+
+.valley-hitbox {
+  width: 1440px;
+  height: 1943px;
+  left: 0px;
+  top: 7007px;
+  z-index: 17;
+  pointer-events: none;
+}
+.valley-hitbox.valley-ready { pointer-events: auto; }
+
+.valley-wind {
+  width: 971px;
+  height: 1392px;
+  left: 342px;
+  top: 7579px;
+  z-index: 12;
+}
+.valley-wind-reveal {
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+.valley-wind-reveal.wind-shown { opacity: 1; }
+
+.poem2-wind-reveal {
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+.poem2-wind-reveal.wind-shown { opacity: 1; }
+
+.flute-cat-trigger {
+  width: 324px;
+  height: 465px;
+  left: -25px;
+  top: 8890px;
+  z-index: 25;
+  cursor: pointer;
+}
+
+.poem2-line-2 {
+  width: 601px;
+  left: 595px;
+  top: 7428px;
+  text-align: right;
+  color: #090C08;
+  z-index: 22;
+}
+
+/* =========================================
+   3. THIRD POEM
+========================================= */
+.monk-bg-red {
+  width: 1460px;
+  height: 2936px;
+  left: -10px;
+  top: 9202px;
+  z-index: 7;
+}
+
+.monk-cloud {
+  width: 1921px;
+  height: 1896px;
+  left: -378px;
+  top: 9202px;
+  z-index: 8;
+  opacity: 0;
+  transition: opacity 1.2s ease;
+}
+.monk-cloud-flow.cloud-floated {
+  opacity: 0.96;
+  animation: monkCloudDrift 7s ease-in-out infinite alternate;
+}
+@keyframes monkCloudDrift {
+  0%   { transform: translate(0px, 0px); }
+  100% { transform: translate(24px, -10px); }
+}
+
+.monk-rock {
+  width: 1853.05px;
+  height: 715.48px;
+  left: -344.93px;
+  top: 11152.52px;
+  z-index: 9;
+  opacity: 1;
+}
+
+.monk-halo {
+  width: 935px;
+  height: auto;
+  left: 395px;
+  top: 9337px;
+  z-index: 10;
+}
+.monk-halo-layer {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.6s ease, visibility 0.6s ease;
+}
+.monk-halo-layer.halo-on {
+  opacity: 1;
+  visibility: visible;
+}
+
+.monk-figure {
+  width: 1678.37px;
+  height: 2116.21px;
+  left: -73.38px;
+  top: 9474px;
+  z-index: 11;
+}
+
+.cat-on-monk {
+  width: 820px;
+  height: 730px;
+  left: 180px;
+  top: 10580px;
+  z-index: 12;
+}
+
+.monk-reveal-target {
+  opacity: 0;
+  transition: opacity 1.3s ease;
+}
+.monk-reveal-target.monk-revealed { opacity: 1; }
+
+.monk-cat-reveal-hitbox {
+  width: 1100px;
+  height: 1550px;
+  left: 150px;
+  top: 9750px;
+  z-index: 24;
+  cursor: pointer;
+}
+
+.monk-head-hitbox {
+  width: 340px;
+  height: 340px;
+  left: 692px;
+  top: 9590px;
+  z-index: 35;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.poem3-line-1 {
+  width: 601px;
+  left: 717px;
+  top: 11235px;
+  text-align: right;
+  color: #151414;
+  z-index: 22;
+}
+
+.rock-trans-end {
+  width: 1440px;
+  height: 2195px;
+  left: 0px;
+  top: 12970px;
+  z-index: 12;
+}
+
+.water-flow { animation: waterStreamFlow 4.5s ease-in-out infinite alternate; }
+@keyframes waterStreamFlow {
+  0%   { transform: translate(0px, 0px); }
+  100% { transform: translate(0px, 10px); }
+}
+
+.monk-and-cat-wrap {
+  width: 1440px;
+  height: 1694px;
+  left: 46px;
+  top: 11920px;
+  z-index: 13;
+}
+.monk-and-cat {
+  width: 1440px;
+  height: 1694px;
+  left: 0px;
+  top: 0px;
+  z-index: 13;
+}
+.end-cat-tail {
+  width: 700px;
+  height: 545px;
+  left: 440px;
+  top: 757px;
+  z-index: 14;
+  transition: opacity 0.35s ease;
+}
+.end-cat-tail-2 {
+  opacity: 0;
+}
+.monk-and-cat-wrap:hover .end-cat-tail {
+  opacity: 0;
+}
+.monk-and-cat-wrap:hover .end-cat-tail-2 {
+  opacity: 1;
+}
+
+.end-clouds {
+  width: 1678px;
+  height: auto;
+  left: -73px;
+  top: 11560px;
+  z-index: 16;
+  pointer-events: none;
+  animation: monkCloudDrift 7s ease-in-out infinite alternate;
+}
+
+.poem3-line-2 {
+  width: 464px;
+  left: 244px;
+  top: 12913px;
+  color: #171512;
+  z-index: 22;
+}
+
+/* =========================================
+   NỐI THÁC NƯỚC → DÒNG SUỐI POEM 4
+   (vạch nối frame 1 / frame 2 nằm ở y = 15717)
+========================================= */
+.water-bridge {
+  left: 220px;
+  top: 14700px;
+  width: 840px;
+  height: 1600px;
+  z-index: 13;
+}
+
+/* lớp màu nước chuyển từ xanh nhạt của thác → xanh đậm của suối */
+.wb-tint {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom,
+    rgba(150, 185, 205, 0) 0%,
+    rgba(140, 178, 202, .32) 35%,
+    rgba(80, 110, 155, .32) 65%,
+    rgba(45, 70, 115, 0) 100%);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 22%, #000 78%, transparent 100%);
+          mask-image: linear-gradient(90deg, transparent 0, #000 22%, #000 78%, transparent 100%);
+}
+
+/* vệt nước rơi */
+.wb-fall {
+  position: absolute;
+  inset: 0;
+  -webkit-mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, #000 40%, transparent 100%);
+          mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, #000 40%, transparent 100%);
+}
+.wb-streaks {
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(180deg,
+    rgba(255, 255, 255, 0) 0 60px,
+    rgba(255, 255, 255, .55) 60px 170px,
+    rgba(255, 255, 255, 0) 170px 300px);
+  -webkit-mask-image: repeating-linear-gradient(90deg, transparent 0 34px, #000 34px 36px, transparent 36px 71px);
+          mask-image: repeating-linear-gradient(90deg, transparent 0 34px, #000 34px 36px, transparent 36px 71px);
+  opacity: .45;
+  animation: waterFall 1.6s linear infinite;
+}
+.wb-streaks.s2 {
+  -webkit-mask-image: repeating-linear-gradient(90deg, transparent 0 15px, #000 15px 16px, transparent 16px 53px);
+          mask-image: repeating-linear-gradient(90deg, transparent 0 15px, #000 15px 16px, transparent 16px 53px);
+  opacity: .3;
+  animation-duration: 2.3s;
+}
+@keyframes waterFall {
+  from { background-position: 0 0; }
+  to   { background-position: 0 300px; }
+}
+
+/* =========================================
+   FRAME 2 — POEM 4 → 6
+========================================= */
+.frame2 {
+  position: absolute;
+  left: 0;
+  top: 15717px;
+  width: 1440px;
+  height: 12480px;
+  z-index: 3;               /* nằm trên texture + mist */
+}
+
+.abs {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+.fill {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.poem {
+  position: absolute;
+  color: #271513;
+  font-size: 36px;
+  font-family: 'Redaction 20', 'Redaction', Georgia, serif;
+  font-weight: 400;
+  line-height: 54px;
+  word-wrap: break-word;
+  pointer-events: none;
+  z-index: 5;
+}
+.poem.light  { color: #E4EDF0; }
+.poem.center { text-align: center; }
+
+.hit {
+  position: absolute;
+  z-index: 20;
+  cursor: pointer;
+}
+
+/* ============ POEM 4 ============ */
+.p4 { position: absolute; }
+
+.p4-water {
+  position: absolute;
+  inset: 0;
+}
+.p4-water.rippling { filter: url(#water); }
+
+.p4-layer { position: absolute; inset: 0; }
+.p4-bottom { z-index: 1; }
+
+.p4-top {
+  z-index: 2;
+  --mx: 50%;
+  --my: 50%;
+  --r: 0.5px;
+  -webkit-mask-image: radial-gradient(var(--r) calc(var(--r) * 0.6) at var(--mx) var(--my), transparent 68%, #000 100%);
+          mask-image: radial-gradient(var(--r) calc(var(--r) * 0.6) at var(--mx) var(--my), transparent 68%, #000 100%);
+}
+
+/* vòng sóng phải nằm TRÊN cả 2 layer (lỗi cũ: bị layer mèo che) */
+.p4-ripples {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* ============ POEM 5 — mây ============ */
+.p5-cloud {
+  pointer-events: auto;
+  cursor: pointer;
+  --dx: 0px;
+  --dy: 0px;
+  transition: transform 3s ease, opacity 2.4s ease;
+}
+.p5-cloud.gone {
+  transform: translate(var(--dx), var(--dy));
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ============ POEM 5 — mặt trời → mặt trăng ============ */
+.p5-sun {
+  pointer-events: auto;
+  cursor: pointer;
+  transition: opacity 1.6s ease, transform 1.6s ease;
+}
+.p5-sun.hide {
+  opacity: 0;
+  transform: scale(.96);
+  pointer-events: none;
+}
+
+.p5-moonwrap {
+  position: absolute;
+  pointer-events: none;
+}
+.p5-moonbg {
+  opacity: 0;
+  transition: opacity 2s ease;
+}
+.p5-moonbg.show { opacity: 1; }
+
+.p5-moon {
+  opacity: 0;
+  transition: opacity 2s ease;
+}
+.p5-moon.show {
+  opacity: 1;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+/* ============ POEM 6 — kiếm (kéo thả) ============ */
+.sword-home {
+  position: absolute;
+  pointer-events: none;
+}
+
+.sword-group {
+  position: absolute;
+  z-index: 4;               /* dưới chữ thơ (z5) như cũ */
+  pointer-events: none;
+  /* tâm lưỡi kiếm — xoay quanh điểm này khi đặt cạnh mèo */
+  transform-origin: 589px 859px;
+  animation: swordIdle 5s ease-in-out infinite;
+}
+.sword-group.dragging,
+.sword-group.resting,
+.sword-group.returning { animation: none; }
+.sword-group.dragging  { z-index: 30; }
+.sword-group.resting   { transition: transform 1.4s cubic-bezier(.3, .7, .2, 1); z-index: 8; }
+.sword-group.returning { transition: transform 1.1s cubic-bezier(.4, 0, .2, 1); }
+
+/* kiếm lơ lửng nhẹ khi chưa đụng tới */
+@keyframes swordIdle {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-14px); }
+}
+
+.p6-sword { position: absolute; }
+
+.sword-hit {
+  left: -185px;
+  top: 739px;
+  width: 1300px;
+  height: 240px;
+  transform: rotate(-58deg);
+  cursor: grab;
+  touch-action: none;
+  pointer-events: auto;     /* nhóm kiếm tắt pointer-events, riêng vùng này bật */
+}
+.sword-group.dragging .sword-hit { cursor: grabbing; }
+
+.p6-flames {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 1.4s ease, transform 1.8s ease;
+}
+.p6-flames.ignited {
+  opacity: 1;
+  transform: none;
+}
+
+/* ============ POEM 6 — mèo → hoa sen ============ */
+.p6-cat { transition: opacity 1.4s ease; }
+.p6-cat.gone { opacity: 0; }
+
+.p6-lotus {
+  opacity: 0;
+  transform-origin: 45% 58%;
+  transform: scale(.96);
+  transition: opacity 1.4s ease, transform 1.8s ease;
+}
+.p6-lotus.bloom {
+  opacity: 1;
+  transform: none;
+}
+
+/* ============ POEM 6 — mây cuối ============ */
+.p6-endcloud {
+  position: absolute;
+  cursor: pointer;
+  z-index: 10;
+  overflow: visible;
+}
+.p6-endcloud img {
+  object-fit: contain;
+  transition: opacity 2.8s ease, transform 3.2s ease, filter 3s ease;
+}
+.p6-endcloud.burning img {
+  filter: blur(10px);
+  opacity: 0;
+  transform: translateY(-28px) scaleX(.92) scaleY(.96);
+}
+
+/* =========================================
+   CHUYỂN ĐỘNG CHỮ THƠ (nhẹ nhàng)
+   JS tách mỗi câu thành từng từ <span class="w">
+========================================= */
+.w {
+  display: inline-block;
+  white-space: pre;
+  pointer-events: auto;
+  cursor: default;
+  opacity: 0;
+  transform: var(--from, translateY(6px));
+  transition: opacity 1s ease, transform 1s ease;
+  transition-delay: calc(var(--i) * 70ms);
+}
+[data-anim].in .w {
+  opacity: 1;
+  transform: none;
+}
+/* sau khi hiện xong thì hover phản hồi ngay, không còn delay */
+[data-anim].settled .w {
+  transition-delay: 0s;
+  transition-duration: .7s;
+}
+
+/* Poem 1 — từ né sang một bên (hổ không có chỗ cắm vuốt) */
+[data-anim="dodge"] .w { --from: translateY(6px); }
+[data-anim="dodge"].in .w.act { transform: translateX(calc(var(--s) * 7px)); }
+
+/* Poem 2 — gió lướt qua thành một làn sóng */
+[data-anim="wave"] .w { --from: translateY(6px); }
+[data-anim="wave"].in .w.act { transform: translateY(-4px); }
+
+/* Poem 3 — trống rỗng: từ mờ đi rồi quay lại */
+[data-anim="fade"] .w { --from: none; transition-duration: 1.6s; }
+[data-anim="fade"].in .w.act { opacity: .12; transition-duration: 1.2s; }
+
+/* Poem 4 — từ dập dềnh như trên mặt nước (luôn hiện) */
+[data-anim="float"] .w {
+  opacity: 1;
+  transform: none;
+  pointer-events: none;
+  animation: wordFloat 4.5s ease-in-out infinite;
+  animation-delay: calc(var(--i) * -0.45s);
+}
+@keyframes wordFloat {
+  0%, 100% { translate: 0 0; }
+  50%      { translate: 0 -3px; }
+}
+
+/* Poem 5 — từ trôi vào từ hai bên như mây */
+[data-anim="drift"] .w { --from: translateX(calc(var(--s) * 12px)); }
+[data-anim="drift"].in .w.act { transform: translateX(calc(var(--s) * 5px)); transition-duration: 1.2s; }
+
+/* Poem 6 — từ hạ xuống yên vị, hover nhấc nhẹ */
+[data-anim="lift"] .w { --from: translateY(-8px); }
+[data-anim="lift"].in .w.act { transform: translateY(-4px); }
